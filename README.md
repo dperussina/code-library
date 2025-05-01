@@ -16,6 +16,9 @@ Welcome to the **Code Library**! This repository contains categorized examples a
 - [Rust](#rust)
   - [Basic Examples](Rust/basic-examples.md)
   - [Advanced Examples](Rust/advanced-examples.md)
+- [Node (JS)](#node-js)
+  - [Basic Examples](Node%20(JS)/basic-examples.md)
+  - [Advanced Examples](Node%20(JS)/advanced-examples.md)
 - [Prerequisites & Environment](#prerequisites--environment)
 - [How to Use This Repository](#how-to-use-this-repository)
 - [LLM / Tooling Integration](#llm--tooling-integration)
@@ -51,6 +54,13 @@ Examples demonstrating common tasks and advanced features in Rust. Requires the 
 
 - **[Basic Examples](Rust/basic-examples.md):** Core I/O (file reading/writing), JSON handling (`serde_json`), command-line parsing (`clap`), logging (`env_logger`), and basic web requests (`reqwest`).
 - **[Advanced Examples](Rust/advanced-examples.md):** Concurrency (`tokio` tasks, `mpsc` channels), advanced error handling (`thiserror`), custom derive macros, WebSockets (`tokio-tungstenite`), advanced pattern matching, parallelism (`rayon`), and structured logging (`tracing`).
+
+## Node (JS)
+
+Leverage Node.js for backend development and scripting with these examples.
+
+- **[Basic Examples](Node%20(JS)/basic-examples.md):** Covers core JavaScript data structures and manipulation (Strings, Arrays, Objects, Types) alongside fundamental Node.js modules like `fs` (async/sync file I/O, JSON), `path`, basic `http` server creation, Promises, and utilities (`console`, timers).
+- **[Advanced Examples](Node%20(JS)/advanced-examples.md):** Explores advanced concepts including Streams (reading large files, piping), concurrency/parallelism (`worker_threads`, `child_process`), web development with `express` (middleware, routing, error handling), database interaction (`pg` for PostgreSQL), real-time communication with `ws` (WebSockets), and configuration management (`dotenv`).
 
 ---
 

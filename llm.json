@@ -149,5 +149,58 @@
       "Rust/snippets/rayon_parallel_iteration.rs",
       "Rust/snippets/tracing_basic_setup.rs"
     ]
+  },
+  {
+    "language": "Node (JS)",
+    "level": "Basic",
+    "description": "Covers core JavaScript data structures and manipulation (Strings, Arrays, Objects, Types) alongside fundamental Node.js modules like fs (async/sync file I/O, JSON), path, basic http server creation, Promises, and utilities (console, timers).",
+    "keywords": ["node", "javascript", "es6", "basic", "file io", "fs", "read file", "write file", "json", "path", "http", "server", "promise", "async", "callback", "setTimeout", "setInterval", "console", "log", "string", "array", "object", "type checking", "type conversion"],
+    "path": "Node (JS)/basic-examples.md",
+    "snippet_files": [
+      "Node (JS)/snippets/string_split_join.js",
+      "Node (JS)/snippets/string_trimming.js",
+      "Node (JS)/snippets/string_replace.js",
+      "Node (JS)/snippets/string_extract.js",
+      "Node (JS)/snippets/array_iteration.js",
+      "Node (JS)/snippets/array_map.js",
+      "Node (JS)/snippets/array_filter.js",
+      "Node (JS)/snippets/array_reduce.js",
+      "Node (JS)/snippets/array_sort.js",
+      "Node (JS)/snippets/object_access.js",
+      "Node (JS)/snippets/object_iteration.js",
+      "Node (JS)/snippets/type_conversion.js",
+      "Node (JS)/snippets/type_checking.js",
+      "Node (JS)/snippets/fs_read_async.js",
+      "Node (JS)/snippets/fs_read_sync.js",
+      "Node (JS)/snippets/fs_write_async.js",
+      "Node (JS)/snippets/fs_read_json_async.js",
+      "Node (JS)/snippets/fs_write_json_async.js",
+      "Node (JS)/snippets/fs_list_dir_async.js",
+      "Node (JS)/snippets/fs_create_dir_async.js",
+      "Node (JS)/snippets/fs_check_exists_async.js",
+      "Node (JS)/snippets/path_operations.js",
+      "Node (JS)/snippets/http_server_basic.js",
+      "Node (JS)/snippets/promises_basic.js",
+      "Node (JS)/snippets/timers.js",
+      "Node (JS)/snippets/console_logging.js"
+    ]
+  },
+  {
+    "language": "Node (JS)",
+    "level": "Advanced",
+    "description": "Explores advanced concepts including Streams (reading large files, piping), concurrency/parallelism (worker_threads, child_process), web development with express (middleware, routing, error handling), database interaction (pg for PostgreSQL), real-time communication with ws (WebSockets), and configuration management (dotenv).",
+    "keywords": ["node", "javascript", "advanced", "stream", "pipe", "readline", "zlib", "gzip", "concurrency", "parallelism", "worker threads", "child process", "spawn", "exec", "express", "web server", "api", "middleware", "routing", "database", "postgres", "pg", "sql", "websockets", "ws", "real time", "dotenv", "environment variables", "config", "async", "await"],
+    "path": "Node (JS)/advanced-examples.md",
+    "snippet_files": [
+      "Node (JS)/snippets/stream_read_large_file.js",
+      "Node (JS)/snippets/stream_piping.js",
+      "Node (JS)/snippets/worker_threads_main.js",
+      "Node (JS)/snippets/worker_threads_worker.js",
+      "Node (JS)/snippets/child_process_spawn.js",
+      "Node (JS)/snippets/express_basic_server.js",
+      "Node (JS)/snippets/db_postgres_query.js",
+      "Node (JS)/snippets/websocket_server.js",
+      "Node (JS)/snippets/dotenv_config.js"
+    ]
   }
 ]
