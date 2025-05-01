@@ -18,6 +18,8 @@ Welcome to the **Code Library**! This repository contains categorized examples a
   - [Advanced Examples](Rust/advanced-examples.md)
 - [Prerequisites & Environment](#prerequisites--environment)
 - [How to Use This Repository](#how-to-use-this-repository)
+- [LLM / Tooling Integration](#llm--tooling-integration)
+- [Using as an MCP Server](#using-as-an-mcp-server)
 - [Contributing](#contributing)
 
 ---
@@ -67,6 +69,87 @@ Examples demonstrating common tasks and advanced features in Rust. Requires the 
 1. Navigate to the relevant section based on the language or topic you are interested in.
 2. Open the linked Markdown files for detailed examples and explanations.
 3. Copy and adapt the code snippets to your own projects as needed.
+
+---
+
+## LLM / Tooling Integration
+
+An index file (`llm.json`) is provided at the root of the repository. This file contains metadata about each example set, including language, level, keywords, and paths to associated standalone snippet files. It is designed to help language models or automated tools efficiently navigate the code library and locate relevant examples based on specific queries.
+
+---
+
+## Using as an MCP Server
+
+This repository can be integrated as an MCP (Multi-Code Provider) server in various development environments using the `gitmcp.io` service. This allows AI assistants within these tools to directly access and reference the code snippets from this library.
+
+Below are the configuration instructions for common tools:
+
+**Cursor:**
+Update your `~/.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "code-library Docs": {
+      "url": "https://gitmcp.io/dperussina/code-library"
+    }
+  }
+}
+```
+
+**Claude Desktop:**
+Update your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "code-library Docs": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://gitmcp.io/dperussina/code-library"
+      ]
+    }
+  }
+}
+```
+
+**Windsurf:**
+Update your `~/.codeium/windsurf/mcp_config.json`:
+```json
+{
+  "mcpServers": {
+    "code-library Docs": {
+      "serverUrl": "https://gitmcp.io/dperussina/code-library"
+    }
+  }
+}
+```
+
+**VSCode:**
+Update your `.vscode/mcp.json` (within your workspace):
+```json
+{
+  "servers": {
+    "code-library Docs": {
+      "type": "sse",
+      "url": "https://gitmcp.io/dperussina/code-library"
+    }
+  }
+}
+```
+
+**Cline:**
+Update your `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`:
+```json
+{
+  "mcpServers": {
+    "code-library Docs": {
+      "url": "https://gitmcp.io/dperussina/code-library",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
 
 ---
 
