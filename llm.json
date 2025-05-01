@@ -1,0 +1,153 @@
+[
+  {
+    "language": "Python",
+    "level": "Basic",
+    "description": "Foundational concepts like file I/O, JSON handling, environment variables, basic logging, and argument parsing.",
+    "keywords": ["file handling", "read file", "write file", "json", "load json", "save json", "environment variables", "logging", "argument parsing", "argparse", "os", "pathlib", "stdlib"],
+    "path": "Python/basic-examples.md",
+    "snippet_files": [
+      "Python/snippets/file_handling.py",
+      "Python/snippets/csv_handling.py",
+      "Python/snippets/json_handling.py",
+      "Python/snippets/file_system_operations.py",
+      "Python/snippets/environment_variables.py",
+      "Python/snippets/basic_logging.py",
+      "Python/snippets/argument_parsing.py",
+      "Python/snippets/stdlib_examples.py",
+      "Python/snippets/web_requests.py",
+      "Python/snippets/timing_datetime.py"
+    ]
+  },
+  {
+    "language": "Python",
+    "level": "Advanced",
+    "description": "Concurrency (multiprocessing, asyncio), performance (Parquet, memory profiling), scientific computing (scipy interpolation, optimization), ML utilities (sklearn scaling, splitting, persistence, metrics), and robust utilities (YAML, SQLAlchemy Core, regex).",
+    "keywords": ["concurrency", "parallelism", "multiprocessing", "asyncio", "aiohttp", "joblib", "performance", "parquet", "pyarrow", "pandas", "memory profiling", "scipy", "interpolation", "optimization", "minimize", "machine learning", "sklearn", "scikit-learn", "feature scaling", "train test split", "cross validation", "model persistence", "joblib dump", "joblib load", "evaluation metrics", "yaml", "pyyaml", "sqlalchemy", "database", "sql", "regex", "re"],
+    "path": "Python/advanced-examples.md",
+    "snippet_files": [
+      "Python/snippets/concurrency_parallelism.py",
+      "Python/snippets/io_bound_concurrency.py",
+      "Python/snippets/joblib_parallelism.py",
+      "Python/snippets/performance_data_handling.py",
+      "Python/snippets/memory_profiling.py",
+      "Python/snippets/scipy_interpolation.py",
+      "Python/snippets/scipy_optimization.py",
+      "Python/snippets/ml_feature_scaling.py",
+      "Python/snippets/ml_train_test_split.py",
+      "Python/snippets/ml_model_persistence.py",
+      "Python/snippets/ml_evaluation_metrics.py",
+      "Python/snippets/yaml_handling.py",
+      "Python/snippets/sqlalchemy_core.py",
+      "Python/snippets/regex_utilities.py"
+    ]
+  },
+  {
+    "language": "Shell Scripting",
+    "level": "Basic",
+    "description": "Robust script templates (set -euo pipefail, trap), argument parsing (getopts), find/xargs usage, text processing (awk, sed, join), and basic curl/jq interaction.",
+    "keywords": ["bash", "sh", "shell script", "error handling", "set -e", "set -u", "trap", "cleanup", "argument parsing", "getopts", "find", "xargs", "text processing", "awk", "sed", "join", "curl", "jq", "api", "json", "robust scripting", "template"],
+    "path": "Shell Scripting/basic-examples.md",
+    "snippet_files": [
+      "Shell Scripting/snippets/robust_script_template.sh",
+      "Shell Scripting/snippets/argument_parsing.sh",
+      "Shell Scripting/snippets/find_and_execute.sh",
+      "Shell Scripting/snippets/advanced_text_processing.sh",
+      "Shell Scripting/snippets/advanced_web_interaction.sh",
+      "Shell Scripting/snippets/advanced_shell_features.sh"
+    ]
+  },
+  {
+    "language": "Shell Scripting",
+    "level": "Advanced",
+    "description": "Advanced parallel usage, database interaction (psql), cloud CLI scripting (AWS example), file locking (flock), checkpointing/resuming, and advanced parameter expansion.",
+    "keywords": ["bash", "shell script", "gnu parallel", "parallel processing", "database", "sql", "psql", "postgres", "transaction", "cloud", "aws", "aws cli", "s3", "file locking", "flock", "concurrency control", "checkpointing", "resume script", "parameter expansion", "string manipulation"],
+    "path": "Shell Scripting/advanced-examples.md",
+    "snippet_files": [
+      "Shell Scripting/snippets/advanced_gnu_parallel.sh",
+      "Shell Scripting/snippets/database_transaction.sh",
+      "Shell Scripting/snippets/cloud_cli_interaction.sh",
+      "Shell Scripting/snippets/file_locking.sh",
+      "Shell Scripting/snippets/checkpointing_resuming.sh",
+      "Shell Scripting/snippets/parameter_expansion.sh"
+    ]
+  },
+  {
+    "language": "SQL",
+    "level": "Basic",
+    "description": "Core DML/DDL (SELECT, INSERT, UPDATE, DELETE, CREATE TABLE), filtering (WHERE), joins (INNER, LEFT), aggregation (GROUP BY, HAVING), subqueries, CTEs (WITH), basic window functions (ranking, LAG/LEAD), CASE WHEN, and NULL handling.",
+    "keywords": ["sql", "select", "insert", "update", "delete", "create table", "where", "filter", "join", "inner join", "left join", "aggregate", "group by", "having", "count", "sum", "avg", "min", "max", "subquery", "cte", "common table expression", "with", "window functions", "row_number", "rank", "dense_rank", "lag", "lead", "case when", "null", "coalesce", "ddl", "dml", "ansi sql"],
+    "path": "SQL/basic-examples.md",
+    "snippet_files": [
+      "SQL/snippets/basic_retrieval_filtering.sql",
+      "SQL/snippets/joins.sql",
+      "SQL/snippets/grouping_aggregation.sql",
+      "SQL/snippets/subquery_where_clause.sql",
+      "SQL/snippets/common_table_expression.sql",
+      "SQL/snippets/ranking_within_partitions.sql",
+      "SQL/snippets/lag_lead.sql",
+      "SQL/snippets/running_aggregates.sql",
+      "SQL/snippets/case_when.sql",
+      "SQL/snippets/extracting_date_time_components.sql",
+      "SQL/snippets/calculating_date_time_differences.sql",
+      "SQL/snippets/getting_current_date_time.sql",
+      "SQL/snippets/string_concatenation.sql",
+      "SQL/snippets/handling_nulls.sql",
+      "SQL/snippets/creating_simple_table.sql",
+      "SQL/snippets/basic_dml.sql",
+      "SQL/snippets/upsert_pattern.sql"
+    ]
+  },
+  {
+    "language": "SQL",
+    "level": "Advanced",
+    "description": "Recursive CTEs, pivoting/unpivoting, sessionization, cohort analysis, querying complex types (JSON, arrays), and statistical functions.",
+    "keywords": ["sql", "recursive cte", "hierarchy", "graph", "pivot", "unpivot", "rows to columns", "columns to rows", "conditional aggregation", "sessionization", "user session", "cohort analysis", "retention", "json", "query json", "arrays", "unnest", "statistics", "stddev", "variance", "percentile", "correlation", "window functions", "advanced sql"],
+    "path": "SQL/advanced-examples.md",
+    "snippet_files": [
+      "SQL/snippets/recursive_cte.sql",
+      "SQL/snippets/pivoting_data.sql",
+      "SQL/snippets/unpivoting_data.sql",
+      "SQL/snippets/sessionization.sql",
+      "SQL/snippets/cohort_analysis.sql",
+      "SQL/snippets/querying_json_data.sql",
+      "SQL/snippets/querying_array_data.sql",
+      "SQL/snippets/built_in_statistical_functions.sql",
+      "SQL/snippets/advanced_indexing.sql",
+      "SQL/snippets/materialized_views.sql",
+      "SQL/snippets/stored_procedures_functions.sql"
+    ]
+  },
+  {
+    "language": "Rust",
+    "level": "Basic",
+    "description": "Core I/O (file reading/writing), JSON handling (serde_json), command-line parsing (clap), logging (env_logger), and basic web requests (reqwest).",
+    "keywords": ["rust", "file io", "read file", "write file", "fs", "json", "serde", "serde_json", "command line", "arguments", "clap", "logging", "log", "env_logger", "web request", "http", "reqwest", "cargo", "stdlib"],
+    "path": "Rust/basic-examples.md",
+    "snippet_files": [
+      "Rust/snippets/read_text_file.rs",
+      "Rust/snippets/write_text_file.rs",
+      "Rust/snippets/read_json_file.rs",
+      "Rust/snippets/write_json_file.rs",
+      "Rust/snippets/clap_basic_args.rs",
+      "Rust/snippets/logging_basic_setup.rs",
+      "Rust/snippets/http_get_request.rs"
+    ]
+  },
+  {
+    "language": "Rust",
+    "level": "Advanced",
+    "description": "Concurrency (tokio tasks, mpsc channels), advanced error handling (thiserror), custom derive macros, WebSockets (tokio-tungstenite), advanced pattern matching, parallelism (rayon), and structured logging (tracing).",
+    "keywords": ["rust", "concurrency", "async", "await", "tokio", "mpsc", "channels", "error handling", "thiserror", "macros", "proc macro", "derive macro", "websockets", "tokio-tungstenite", "pattern matching", "match", "parallelism", "rayon", "par_iter", "logging", "structured logging", "tracing", "spans", "events", "cargo"],
+    "path": "Rust/advanced-examples.md",
+    "snippet_files": [
+      "Rust/snippets/tokio_spawn_tasks.rs",
+      "Rust/snippets/tokio_mpsc_channel.rs",
+      "Rust/snippets/thiserror_custom_error.rs",
+      "Rust/snippets/custom_derive_macro_concept.rs",
+      "Rust/snippets/websocket_client_tungstenite.rs",
+      "Rust/snippets/advanced_pattern_matching.rs",
+      "Rust/snippets/rayon_parallel_iteration.rs",
+      "Rust/snippets/tracing_basic_setup.rs"
+    ]
+  }
+]

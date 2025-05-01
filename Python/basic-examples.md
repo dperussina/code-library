@@ -1,3 +1,7 @@
+# Python Code Snippets Library: Basic Examples
+
+This document provides an overview of common Python tasks covered in our code snippets library, formatted for clarity.
+
 **Core Libraries Often Needed:**
 
 * `os`, `pathlib`: File system interaction
@@ -17,7 +21,10 @@
 
 **1. File Handling (I/O)**
 
-* **Reading a Text File Line by Line:**
+* **Reading a Text File Line by Line**
+    *   **What it does:** Reads an entire text file into memory and returns its contents as a list of strings, with leading/trailing whitespace removed from each line.
+    *   **Why you use it:** Useful for processing configuration files, logs, or any line-delimited text data where the entire file content can comfortably fit in memory.
+    *   [See standalone snippet: snippets/file_handling.py](./snippets/file_handling.py)
     ```python
     import os
     from pathlib import Path
@@ -41,7 +48,10 @@
     #     print(f"Read {len(lines)} lines.")
     ```
 
-* **Writing Lines to a Text File:**
+* **Writing Lines to a Text File**
+    *   **What it does:** Writes a list of strings to a specified text file, adding a newline character after each string.
+    *   **Why you use it:** To save processed data, logs, or generated text content to a file. Allows appending or overwriting.
+    *   [See standalone snippet: snippets/file_handling.py](./snippets/file_handling.py)
     ```python
     from pathlib import Path
 
@@ -61,7 +71,10 @@
     # write_text_file("output.txt", data_to_write, overwrite=True)
     ```
 
-* **Reading CSV Files (using `csv` module):**
+* **Reading CSV Files (using `csv` module)**
+    *   **What it does:** Parses a Comma Separated Values (CSV) file using Python's built-in `csv` library.
+    *   **Why you use it:** Standard, lightweight way to read structured tabular data without external dependencies like pandas. Good for simple CSV processing.
+    *   [See standalone snippet: snippets/csv_handling.py](./snippets/csv_handling.py)
     ```python
     import csv
     from pathlib import Path
@@ -90,7 +103,10 @@
     #    print(f"Read {len(csv_data)} rows (excluding header).")
     ```
 
-* **Reading CSV Files (using `pandas` - common for Data Science):**
+* **Reading CSV Files (using `pandas` - common for Data Science)**
+    *   **What it does:** Reads a CSV file directly into a pandas DataFrame.
+    *   **Why you use it:** Extremely common in data analysis workflows. Pandas provides powerful tools for manipulation, cleaning, and analysis immediately after reading.
+    *   [See standalone snippet: snippets/csv_handling.py](./snippets/csv_handling.py) (*Functionality likely within this file*)
     ```python
     import pandas as pd
     from pathlib import Path
@@ -114,7 +130,10 @@
     #     print(dataframe.head())
     ```
 
-* **Writing Pandas DataFrame to CSV:**
+* **Writing Pandas DataFrame to CSV**
+    *   **What it does:** Saves the contents of a pandas DataFrame to a CSV file.
+    *   **Why you use it:** Standard way to persist DataFrames or share tabular data generated from analysis.
+    *   [See standalone snippet: snippets/csv_handling.py](./snippets/csv_handling.py)
     ```python
     import pandas as pd
     from pathlib import Path
@@ -132,7 +151,10 @@
     # write_csv_pandas(dataframe, "output_data.csv")
     ```
 
-* **Reading JSON Files:**
+* **Reading JSON Files**
+    *   **What it does:** Parses a file containing JSON data into the equivalent Python object (usually a dictionary or list).
+    *   **Why you use it:** JSON is a very common format for configuration files, API responses, and data interchange.
+    *   [See standalone snippet: snippets/json_handling.py](./snippets/json_handling.py)
     ```python
     import json
     from pathlib import Path
@@ -159,7 +181,10 @@
     #     print("Config loaded:", config)
     ```
 
-* **Writing Data to JSON File:**
+* **Writing Data to JSON File**
+    *   **What it does:** Serializes a Python dictionary or list into JSON format and writes it to a file.
+    *   **Why you use it:** To save Python data structures in a standard, human-readable format that can be easily read by other programs or systems.
+    *   [See standalone snippet: snippets/json_handling.py](./snippets/json_handling.py)
     ```python
     import json
     from pathlib import Path
@@ -180,7 +205,10 @@
 
 **2. File System Operations (using `pathlib`)**
 
-* **Listing Files in a Directory:**
+* **Listing Files in a Directory**
+    *   **What it does:** Retrieves a list of file paths within a specified directory, optionally matching a specific pattern.
+    *   **Why you use it:** To discover files for processing, check directory contents, or perform batch operations.
+    *   [See standalone snippet: snippets/file_system_operations.py](./snippets/file_system_operations.py)
     ```python
     from pathlib import Path
 
@@ -198,7 +226,10 @@
     # print(f"Found files: {txt_files}")
     ```
 
-* **Creating Directories:**
+* **Creating Directories**
+    *   **What it does:** Creates a directory at the specified path.
+    *   **Why you use it:** To ensure that output directories or necessary folder structures exist before writing files. `parents=True` is useful for creating nested directories.
+    *   [See standalone snippet: snippets/file_system_operations.py](./snippets/file_system_operations.py)
     ```python
     from pathlib import Path
 
@@ -215,7 +246,10 @@
     # create_directory("data/raw/images")
     ```
 
-* **Checking if File or Directory Exists:**
+* **Checking if File or Directory Exists**
+    *   **What it does:** Checks if a path exists in the file system and whether it points to a file or a directory.
+    *   **Why you use it:** To avoid errors by confirming a file exists before reading it, or a directory exists before writing to it or listing its contents.
+    *   [See standalone snippet: snippets/file_system_operations.py](./snippets/file_system_operations.py)
     ```python
     from pathlib import Path
 
@@ -240,7 +274,10 @@
 
 **3. Data Structures & Common Operations**
 
-* **Counting Item Frequencies:**
+* **Counting Item Frequencies**
+    *   **What it does:** Counts how many times each unique item appears in a list (or other iterable).
+    *   **Why you use it:** Useful for summarizing data, finding the most common elements, or analyzing distributions.
+    *   [See standalone snippet: snippets/data_structures.py](./snippets/data_structures.py)
     ```python
     from collections import Counter
 
@@ -255,7 +292,10 @@
     # print(counts.most_common(2)) # Output: [('a', 3), ('b', 2)]
     ```
 
-* **Flattening a List of Lists:**
+* **Flattening a List of Lists**
+    *   **What it does:** Transforms a list where each element is itself a list (a nested list) into a single, non-nested list.
+    *   **Why you use it:** To simplify data structures that result from operations that group items into lists, making the individual items easier to iterate over or process.
+    *   [See standalone snippet: snippets/utility_functions.py](./snippets/utility_functions.py)
     ```python
     def flatten_list(list_of_lists: list[list]) -> list:
         """Flattens a list of lists into a single list."""
@@ -270,7 +310,10 @@
     # print(flat)
     ```
 
-* **Removing Duplicates from a List (while preserving order):**
+* **Removing Duplicates from a List (while preserving order)**
+    *   **What it does:** Creates a new list containing only the first occurrence of each unique element from the input list, maintaining the original relative order.
+    *   **Why you use it:** When you need a list of unique items but the order matters (unlike converting directly to a `set`).
+    *   [See standalone snippet: snippets/data_structures.py](./snippets/data_structures.py)
     ```python
     def unique_ordered(items: list) -> list:
         """Removes duplicates from a list while preserving original order."""
@@ -290,7 +333,10 @@
 
 **4. Utility Functions**
 
-* **Timing Code Execution (Decorator):**
+* **Timing Code Execution (Decorator)**
+    *   **What it does:** A Python decorator that measures the execution time of any function it wraps.
+    *   **Why you use it:** Easy way to quickly profile the performance of specific functions without cluttering the function logic with timing code.
+    *   [See standalone snippet: snippets/utility_functions.py](./snippets/utility_functions.py)
     ```python
     import time
     import functools
@@ -319,7 +365,10 @@
     # result = potentially_slow_function(1000000)
     ```
 
-* **Basic Logging Setup:**
+* **Basic Logging Setup**
+    *   **What it does:** Configures Python's standard `logging` module for basic use.
+    *   **Why you use it:** To record informational messages, warnings, errors, and debug details during script execution, which is crucial for monitoring and troubleshooting. Allows directing output to console and/or files.
+    *   [See standalone snippet: snippets/utility_functions.py](./snippets/utility_functions.py) (*Assuming logger setup is here*)
     ```python
     import logging
     import sys
@@ -343,7 +392,10 @@
     # logging.critical("Critical failure.")
     ```
 
-* **Command-Line Argument Parsing:**
+* **Command-Line Argument Parsing**
+    *   **What it does:** Defines and parses arguments provided to a Python script when it's run from the command line.
+    *   **Why you use it:** Makes scripts more flexible and configurable without needing to edit the code directly. Standard way to handle inputs, file paths, and options.
+    *   [See standalone snippet: snippets/argparse_utilities.py](./snippets/argparse_utilities.py)
     ```python
     import argparse
 
@@ -371,7 +423,10 @@
           # main_function(args.input_file, args.output, args.number, args.verbose)
     ```
 
-* **Handling Dates and Times:**
+* **Handling Dates and Times**
+    *   **What it does:** Provides functions to work with dates and times, including getting the current time, converting between strings and `datetime` objects, and calculating durations.
+    *   **Why you use it:** Essential for timestamping events, parsing date information from data sources, performing date-based calculations, and formatting dates for display or logging.
+    *   [See standalone snippet: snippets/datetime_utilities.py](./snippets/datetime_utilities.py)
     ```python
     from datetime import datetime, timedelta
 
@@ -407,7 +462,10 @@
 
 **5. Web Interaction**
 
-* **Simple GET Request:**
+* **Simple GET Request**
+    *   **What it does:** Fetches content from a web URL using an HTTP GET request.
+    *   **Why you use it:** To retrieve data from web APIs, download files, or scrape simple web pages.
+    *   [See standalone snippet: snippets/web_interaction.py](./snippets/web_interaction.py)
     ```python
     import requests
 
@@ -436,7 +494,10 @@
 
 **6. NumPy Basics (Numerical Computing)**
 
-* **Creating NumPy Arrays:**
+* **Creating NumPy Arrays**
+    *   **What it does:** Demonstrates creating NumPy ndarrays (n-dimensional arrays).
+    *   **Why you use it:** NumPy arrays are the foundation for numerical computing in Python, offering efficient storage and operations for numerical data compared to standard Python lists.
+    *   [See standalone snippet: snippets/numpy_basics.py](./snippets/numpy_basics.py)
     ```python
     import numpy as np
 
@@ -458,7 +519,10 @@
     # print("Linspace array:", linspace_arr)
     ```
 
-* **Basic Array Operations (Vectorization):**
+* **Basic Array Operations (Vectorization)**
+    *   **What it does:** Shows how standard arithmetic operations work element-wise on NumPy arrays.
+    *   **Why you use it:** Vectorization allows performing operations on entire arrays efficiently without writing explicit Python loops, leading to much faster computations for numerical tasks.
+    *   [See standalone snippet: snippets/numpy_basics.py](./snippets/numpy_basics.py)
     ```python
     import numpy as np
 
@@ -488,7 +552,10 @@
 
 **7. Pandas Basics (Data Manipulation)**
 
-* **Selecting Columns and Rows (`loc`, `iloc`):**
+* **Selecting Columns and Rows (`loc`, `iloc`)**
+    *   **What it does:** Extracts specific subsets of data from a pandas DataFrame based on row/column labels or integer positions.
+    *   **Why you use it:** Fundamental for accessing the data you need for analysis, filtering, or updates within a DataFrame.
+    *   [See standalone snippet: snippets/pandas_basics.py](./snippets/pandas_basics.py)
     ```python
     import pandas as pd
     import numpy as np
@@ -525,7 +592,10 @@
     # print("\nSubset using iloc[1:3, 0:2]:\n", subset_iloc)
     ```
 
-* **Filtering Data:**
+* **Filtering Data**
+    *   **What it does:** Selects rows from a DataFrame that meet specific criteria or conditions.
+    *   **Why you use it:** To isolate relevant data points for analysis, remove outliers, or prepare data subsets for specific processing steps.
+    *   [See standalone snippet: snippets/pandas_basics.py](./snippets/pandas_basics.py)
     ```python
     import pandas as pd
     # Using the same df from previous example
@@ -548,7 +618,10 @@
     # print("\nFiltered using query('col1 > 2 and col3 != \"A\"'):\n", filtered_df3)
     ```
 
-* **Handling Missing Data (`NaN`):**
+* **Handling Missing Data (`NaN`)**
+    *   **What it does:** Provides methods to detect, remove, or replace missing values (often represented as `NaN`) in a DataFrame.
+    *   **Why you use it:** Missing data can cause errors in calculations or bias analysis results. These techniques are essential for data cleaning and preparation.
+    *   [See standalone snippet: snippets/missing_data_handling.py](./snippets/missing_data_handling.py)
     ```python
     import pandas as pd
     import numpy as np
@@ -584,7 +657,10 @@
     # print("\nDataFrame after filling colA NaN with mean:\n", df_filled_mean)
     ```
 
-* **Grouping and Aggregation (`groupby`):**
+* **Grouping and Aggregation (`groupby`)**
+    *   **What it does:** Groups rows in a DataFrame based on the values in one or more columns, then applies aggregation functions (like sum, mean, count) to other columns within each group.
+    *   **Why you use it:** Powerful technique for summarizing data by category, calculating group-level statistics, and understanding variations across different segments of the data.
+    *   [See standalone snippet: snippets/grouping_aggregation.py](./snippets/grouping_aggregation.py)
     ```python
     import pandas as pd
 

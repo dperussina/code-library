@@ -1,18 +1,20 @@
+# Shell Scripting Code Snippets Library: Basic & Robust Examples
+
+This document covers fundamental and robust shell scripting techniques useful for automation, system administration, and development tasks.
+
 **Important Considerations:**
 
-* **Shell Dialects:** While many snippets will work in POSIX-compliant shells (`sh`), some utilize `bash`-specific features for convenience or power. These will be noted where applicable. For maximum portability, stick to POSIX features. For everyday use on Linux/macOS, `bash` is usually fine.
-* **Safety:** Always quote variables (`"$variable"`) to handle spaces and special characters correctly. Use `set -e` (exit on error), `set -u` (error on unset variables), and `set -o pipefail` (fail pipeline if any command fails) at the beginning of scripts for robustness.
-* **Tools:** Many powerful snippets rely on standard command-line tools like `grep`, `sed`, `awk`, `find`, `xargs`, `sort`, `uniq`, `cut`, `curl`, `jq`. Ensure these are available on the target system (`jq` often needs explicit installation).
-Okay, let's add some more advanced Bash/shell scripting snippets to your collection. These cover more complex logic, robust scripting practices, advanced text processing, and interactions with external tools.
-
-**Reminder:** Continue to prioritize quoting variables (`"$var"`), using `set -euo pipefail` (explained in snippet #1), and noting `bash`-specific features.
+*   **Shell Dialects:** While many snippets will work in POSIX-compliant shells (`sh`), some utilize `bash`-specific features for convenience or power. These will be noted where applicable. For maximum portability, stick to POSIX features. For everyday use on Linux/macOS, `bash` is usually fine.
+*   **Safety:** Always quote variables (`"$variable"`) to handle spaces and special characters correctly. Use `set -e` (exit on error), `set -u` (error on unset variables), and `set -o pipefail` (fail pipeline if any command fails) at the beginning of scripts for robustness (see snippet #1).
+*   **Tools:** Many powerful snippets rely on standard command-line tools like `grep`, `sed`, `awk`, `find`, `xargs`, `sort`, `uniq`, `cut`, `curl`, `jq`. Ensure these are available on the target system (`jq` often needs explicit installation).
 
 ---
 
 **1. Robust Script Template (Error Handling & Cleanup)**
 
-* **Purpose:** A starting template for scripts that ensures they exit on errors, handle unset variables, report pipeline failures, and perform cleanup actions (like removing temporary files) on exit or interruption.
-* **Shell Code (`bash`):**
+*   **What it does:** Provides a starting template for scripts that ensures they exit on errors, handle unset variables, report pipeline failures, and perform cleanup actions (like removing temporary files) on exit or interruption.
+*   **Why you use it:** To write more reliable and cleaner shell scripts by implementing standard error handling (`set -euo pipefail`), consistent logging, and automatic cleanup (`trap`). Essential for scripts used in automation or critical tasks.
+*   **Code (`bash`):**
     ```bash
     #!/bin/bash
 
@@ -78,20 +80,14 @@ Okay, let's add some more advanced Bash/shell scripting snippets to your collect
     # Explicit exit 0 is optional if set -e is active and no errors occurred.
     # exit 0
     ```
-* **Explanation:**
-    * `set -euo pipefail`: Sets strict error-checking modes (essential for reliable scripts).
-    * `log`, `error_exit`: Basic functions for consistent output and error handling. `error_exit` prints to standard error (`>&2`) and ensures cleanup runs before exiting with a non-zero status.
-    * `cleanup`: A function to remove temporary files/directories or perform other shutdown tasks.
-    * `trap cleanup EXIT INT TERM`: Registers the `cleanup` function to run automatically when the script exits for any reason (normal completion, error via `exit` or `set -e`, or signals like Ctrl+C).
-    * `mktemp -d`: Securely creates a temporary directory. Its path is stored in `TMP_DIR` for use in `cleanup`.
-* **Notes:** This template provides a solid foundation for writing more reliable and cleaner scripts. Customize the `cleanup` function based on your script's needs.
 
 ---
 
 **2. Advanced Command-Line Argument Parsing (`getopts`)**
 
-* **Purpose:** Parsing short command-line options (like `-f`, `-v`, `-o value`) in a standard and robust way, handling options that require arguments.
-* **Shell Code (`bash` built-in):**
+*   **What it does:** Parses short command-line options (like `-f`, `-v`, `-o value`) in a standard and robust way, handling options that require arguments and providing usage instructions.
+*   **Why you use it:** To create user-friendly command-line tools with configurable behavior, standardizing how options and arguments are handled compared to manual parsing.
+*   **Code (`bash` built-in):**
     ```bash
     #!/bin/bash
     set -euo pipefail
@@ -167,21 +163,14 @@ Okay, let's add some more advanced Bash/shell scripting snippets to your collect
         echo "Processing will write to standard output."
     fi
     ```
-* **Explanation:**
-    * `getopts "..." opt`: Iterates through command-line arguments looking for options defined in the option string (e.g., `":vo:m:h"`).
-    * `:` after `o` and `m` means they expect an argument, which `getopts` places in the `OPTARG` variable.
-    * Leading `:` in the option string enables custom error handling for invalid options (`\?`) and missing arguments (`:`).
-    * `case "$opt" in ... esac`: Handles each valid option found.
-    * `shift $((OPTIND - 1))`: Removes the parsed options and their arguments from the positional parameters (`$@`), leaving only the non-option arguments (like `input_file`).
-    * `$#`: Checks the number of remaining arguments.
-* **Notes:** `getopts` is built into `bash` and handles short options well. For long options (e.g., `--verbose`, `--output-file`), the external GNU `getopt` command is often used, but its syntax is more complex and less portable.
 
 ---
 
 **3. Finding Files and Executing Commands (`find` + `xargs`)**
 
-* **Purpose:** Find files based on complex criteria and perform an action (like delete, rename, process) on each found file, often in parallel.
-* **Shell Code:**
+*   **What it does:** Finds files based on various criteria (name, type, size, modification time) and executes a command on the found files, potentially in parallel.
+*   **Why you use it:** Powerful combination for batch processing files (e.g., deleting old logs, compressing large files, changing permissions) efficiently and safely, especially when dealing with filenames containing special characters (`-print0` / `-0`).
+*   **Code:**
     ```bash
     #!/bin/bash
     set -euo pipefail
@@ -222,242 +211,306 @@ Okay, let's add some more advanced Bash/shell scripting snippets to your collect
     find "$SEARCH_DIR" -type f -name "*.tmp" -exec chmod 600 {} \;
     echo "Permission change attempt complete."
     ```
-* **Explanation:**
-    * `find <dir> [criteria]`: Searches for files/directories. Key criteria include `-name`, `-type`, `-mtime` (modification time), `-size`.
-    * `-print0`: Safely handles filenames with spaces or special characters by using a null terminator. Essential when piping to `xargs -0`.
-    * `xargs [options] command`: Reads items from standard input and executes `command`, passing the items as arguments.
-    * `xargs -0`: Expects null-terminated input (from `find -print0`).
-    * `xargs -r`: Prevents running the command if the input is empty.
-    * `xargs -P N`: Runs up to N commands in parallel.
-    * `xargs -I {}`: Replaces `{}` in the command with the input item (useful when filename isn't the last argument).
-    * `find ... -exec command {} \;`: Alternative to `xargs` for running a single command per file. Often less efficient than `xargs` for many files because it spawns a new process for each file.
-* **Notes:** `find` and `xargs` are incredibly powerful for batch file operations. Always test `find` commands without the `-exec` or `| xargs rm` part first to ensure you're selecting the correct files.
 
 ---
 
 **4. Advanced Text Processing (`awk`, `sed`, `join`)**
 
-* **`awk` for Calculations and Reporting**
-    ```bash
-    #!/bin/bash
-    # Example: Process a CSV file (data.csv) assumed to have columns: ID,Category,Value
-    # Calculate sum and average value per category.
+*   **`awk` for Calculations and Reporting**
+    *   **What it does:** Processes text files line by line, splitting them into fields, and allows performing calculations, aggregations, and formatted reporting based on the field data.
+    *   **Why you use it:** Extremely effective for manipulating structured text data (like CSV or space-delimited files), calculating sums/averages per category, and generating custom reports without complex looping in shell.
+    *   **Code:**
+        ```bash
+        #!/bin/bash
+        # Example: Process a CSV file (data.csv) assumed to have columns: ID,Category,Value
+        # Calculate sum and average value per category.
 
-    awk -F',' 'NR > 1 { # -F sets field separator, NR > 1 skips header row
-        sum[$2] += $3; # Sum column 3 ($3) grouping by column 2 ($2)
-        count[$2]++;   # Count items per category
-    }
-    END { # Runs after processing all lines
-        print "Category,TotalValue,Count,AverageValue"; # Print header
-        for (cat in sum) {
-            average = sum[cat] / count[cat];
-            printf "%s,%.2f,%d,%.2f\n", cat, sum[cat], count[cat], average;
+        # Create dummy data.csv for example
+        cat << EOF > data.csv
+        ID,Category,Value
+        1,Alpha,10.5
+        2,Beta,20.0
+        3,Alpha,15.5
+        4,Gamma,5.0
+        5,Beta,25.0
+        EOF
+
+        echo "Processing data.csv with awk..."
+        awk -F',' 'NR > 1 { # -F sets field separator, NR > 1 skips header row
+            sum[$2] += $3; # Sum column 3 ($3) grouping by column 2 ($2)
+            count[$2]++;   # Count items per category
         }
-    }' data.csv # Input file
-    ```
-    * **Explanation:** `awk` processes files line by line, splitting lines into fields (here, using comma `-F','`). It uses associative arrays (`sum`, `count`) keyed by the category (`$2`) to accumulate totals and counts. The `END` block executes after all lines are read, iterating through the collected categories to print the summary report, formatted using `printf`.
-    * **Notes:** `awk` is a powerful programming language for structured text data manipulation, especially column-based data.
+        END { # Runs after processing all lines
+            print "Category,TotalValue,Count,AverageValue"; # Print header
+            for (cat in sum) {
+                average = sum[cat] / count[cat];
+                printf "%s,%.2f,%d,%.2f\n", cat, sum[cat], count[cat], average;
+            }
+        }' data.csv # Input file
 
-* **`sed` for In-Place Editing or Complex Substitution**
-    ```bash
-    #!/bin/bash
-    # Example: Replace all occurrences of "Error" with "Warning" in specific log files
-    # WARNING: sed -i modifies files directly. Backup first or test without -i.
+        rm data.csv # Clean up dummy file
+        ```
 
-    LOG_DIR="./logs"
-    PATTERN="error_report_*.log"
+*   **`sed` for In-Place Editing or Complex Substitution**
+    *   **What it does:** Performs text transformations on streams or files, commonly used for search-and-replace operations. Can edit files directly (`-i`).
+    *   **Why you use it:** Useful for making systematic changes across files (e.g., updating configuration values, correcting common errors) or extracting/reformatting specific parts of lines using regular expressions and capture groups.
+    *   **Code:**
+        ```bash
+        #!/bin/bash
+        # Example: Replace all occurrences of "Error" with "Warning" in specific log files
+        # WARNING: sed -i modifies files directly. Backup first or test without -i.
 
-    # Find log files and use sed to replace text
-    # Use find + xargs for potentially many files
-    find "$LOG_DIR" -maxdepth 1 -type f -name "$PATTERN" -print0 | \
-        xargs -0 -r sed -i.bak 's/Error/Warning/gi'
-        # -i.bak: Edit in-place, create backup with .bak extension
-        # s/old/new/g: Substitute old with new, globally on each line
-        # i: Case-insensitive match
+        LOG_DIR="./logs_sed_example"
+        PATTERN="error_report_*.log"
+        mkdir -p "$LOG_DIR"
+        echo "An Error occurred in report 1." > "$LOG_DIR/error_report_1.log"
+        echo "Another error message." > "$LOG_DIR/error_report_2.log"
+        echo "All ok here." > "$LOG_DIR/status.log"
 
-    echo "Replacement attempt complete. Backup files created with .bak extension."
+        echo "Running sed replacement..."
+        # Find log files and use sed to replace text
+        # Use find + xargs for potentially many files
+        find "$LOG_DIR" -maxdepth 1 -type f -name "$PATTERN" -print0 | \
+            xargs -0 -r sed -i.bak 's/Error/Warning/gi'
+            # -i.bak: Edit in-place, create backup with .bak extension
+            # s/old/new/g: Substitute old with new, globally on each line
+            # i: Case-insensitive match
 
-    # Example 2: Extract specific data using capture groups (no -i)
-    # Extract YYYY-MM-DD from lines like "Timestamp: 2025-04-28 ..."
-    echo "Timestamp: 2025-04-28 Data" | sed -n 's/^Timestamp: \([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\).*/\1/p'
-    # -n: Suppress default output
-    # s/.../.../p: Substitute and print only if substitution occurs
-    # \(...\): Capture group
-    # \1: Backreference to the first capture group
-    # \{N\}: Match preceding item N times (Basic Regex)
-    ```
-    * **Explanation:** `sed` (Stream Editor) modifies text based on commands. `s/old/new/g` is the substitute command (global on the line). `-i` modifies the file in-place (use with extreme caution!). Capture groups `\(...\)` and backreferences `\1`, `\2`, etc., allow complex restructuring and extraction.
-    * **Notes:** `sed` syntax (especially regex flavor - Basic vs. Extended) can vary. `-i` behavior differs slightly between GNU `sed` (Linux) and BSD `sed` (macOS). Always test `sed` commands without `-i` first.
+        echo "Replacement attempt complete. Backup files created with .bak extension."
+        echo "Contents of modified files:"
+        cat "$LOG_DIR"/*.log
 
-* **`join` Command for Relational Data in Files**
-    ```bash
-    #!/bin/bash
-    # Example: Join two sorted text files based on a common key field.
-    # Assumes file1.txt and file2.txt are sorted on their first field (the key).
+        echo "---"
+        # Example 2: Extract specific data using capture groups (no -i)
+        # Extract YYYY-MM-DD from lines like "Timestamp: 2025-04-28 ..."
+        echo "Extracting date:"
+        echo "Timestamp: 2025-04-28 Data" | sed -n 's/^Timestamp: \([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\).*/\1/p'
+        # -n: Suppress default output
+        # s/.../.../p: Substitute and print only if substitution occurs
+        # \(...\): Capture group
+        # \1: Backreference to the first capture group
+        # \{N\}: Match preceding item N times (Basic Regex)
 
-    # file1.txt example:
-    # 101,Alice,Admin
-    # 102,Bob,Dev
-    # 104,Charlie,Dev
+        # Clean up
+        rm -rf "$LOG_DIR"
+        ```
 
-    # file2.txt example:
-    # 101,New York
-    # 102,London
-    # 103,Paris
+*   **`join` Command for Relational Data in Files**
+    *   **What it does:** Performs relational database-style joins on lines from two files based on a common field.
+    *   **Why you use it:** To combine related data from different text files based on a shared key column, similar to a SQL JOIN, without needing a database. Requires input files to be sorted on the join key.
+    *   **Code:**
+        ```bash
+        #!/bin/bash
+        # Example: Join two sorted text files based on a common key field.
+        # Assumes file1.txt and file2.txt are sorted on their first field (the key).
 
-    # Ensure files are sorted (required by join)
-    sort -t',' -k1,1 file1.txt -o file1.sorted.txt
-    sort -t',' -k1,1 file2.txt -o file2.sorted.txt
+        # Create dummy sorted files for example
+        cat << EOF > file1.sorted.txt
+        101,Alice,Admin
+        102,Bob,Dev
+        104,Charlie,Dev
+        EOF
 
-    echo "Joining files..."
-    # -t,: Use comma as delimiter
-    # -1 1: Join on field 1 of file 1
-    # -2 1: Join on field 1 of file 2
-    # -a 1: Print unpairable lines from file 1 (like LEFT JOIN)
-    # -o FORMAT: Specify output format (0=join field, 1.N=field N from file 1, 2.N=field N from file 2)
-    join -t',' -1 1 -2 1 \
-         -a 1 \
-         -o 0,1.2,1.3,2.2 \
-         file1.sorted.txt file2.sorted.txt > joined_output.txt
-    # Output in joined_output.txt:
-    # 101,Alice,Admin,New York
-    # 102,Bob,Dev,London
-    # 104,Charlie,Dev,
+        cat << EOF > file2.sorted.txt
+        101,New York
+        102,London
+        103,Paris
+        EOF
 
-    echo "Join complete. Output in joined_output.txt"
-    # Clean up sorted files (optional)
-    # rm file1.sorted.txt file2.sorted.txt
-    ```
-    * **Explanation:** The `join` command performs relational database-style joins on lines from two files, provided they are sorted on the join field. `-t` specifies the delimiter. `-1 N` and `-2 M` specify the join fields in file 1 and file 2. `-a` includes lines without matches (like outer joins). `-o` formats the output.
-    * **Notes:** Input files *must* be sorted lexicographically on the join field. `join` is powerful for combining simple structured text files without needing a full database.
+        echo "Joining files..."
+        # -t,: Use comma as delimiter
+        # -1 1: Join on field 1 of file 1
+        # -2 1: Join on field 1 of file 2
+        # -a 1: Print unpairable lines from file 1 (like LEFT JOIN)
+        # -o FORMAT: Specify output format (0=join field, 1.N=field N from file 1, 2.N=field N from file 2)
+        join -t',' -1 1 -2 1 \
+             -a 1 \
+             -o 0,1.2,1.3,2.2 \
+             file1.sorted.txt file2.sorted.txt > joined_output.txt
+
+        echo "Join complete. Output in joined_output.txt:"
+        cat joined_output.txt
+        # Expected Output:
+        # 101,Alice,Admin,New York
+        # 102,Bob,Dev,London
+        # 104,Charlie,Dev,
+
+        # Clean up dummy files
+        rm file1.sorted.txt file2.sorted.txt joined_output.txt
+        ```
 
 ---
 
 **5. Advanced Web Interaction (`curl` + `jq`)**
 
-* **`curl` POST Request with JSON Data + `jq` Filtering**
-    ```bash
-    #!/bin/bash
-    set -euo pipefail
+*   **`curl` POST Request with JSON Data + `jq` Filtering**
+    *   **What it does:** Sends an HTTP POST request with a JSON payload constructed using `jq`, then parses the JSON response using `jq` to extract specific data fields.
+    *   **Why you use it:** Common pattern for interacting with web APIs. Using `jq` to build and parse JSON is safer and more robust than manual string manipulation in shell. Allows easy extraction of needed information from complex API responses.
+    *   **Code:**
+        ```bash
+        #!/bin/bash
+        set -euo pipefail
 
-    API_ENDPOINT="https://httpbin.org/post" # Test endpoint that echoes request
-    AUTH_TOKEN="your_secret_token_here"    # Example token
+        API_ENDPOINT="https://httpbin.org/post" # Test endpoint that echoes request
+        AUTH_TOKEN="your_secret_token_here"    # Example token
 
-    # Data to send as JSON payload
-    JSON_PAYLOAD=$(jq -n --arg name "Gadget" --arg quantity 5 \
-      '{ "item_name": $name, "qty": $quantity, "options": ["red", "large"] }')
-      # jq -n: Use null input to construct JSON
-      # --arg var val: Pass shell variable as jq string variable
+        # Data to send as JSON payload
+        # Use jq to safely create JSON, handling special characters
+        JSON_PAYLOAD=$(jq -n --arg name "Gadget" --arg quantity 5 \
+          '{ "item_name": $name, "qty": $quantity, "options": ["red", "large"] }')
+          # jq -n: Use null input to construct JSON
+          # --arg var val: Pass shell variable as jq string variable
 
-    echo "Sending POST request to $API_ENDPOINT"
-    echo "Payload: $JSON_PAYLOAD"
+        echo "Sending POST request to $API_ENDPOINT"
+        echo "Payload: $JSON_PAYLOAD"
 
-    # -s: Silent mode (no progress meter)
-    # -X POST: Specify POST method
-    # -H 'Content-Type: application/json': Set header
-    # -H "Authorization: Bearer $AUTH_TOKEN": Example auth header
-    # -d "$JSON_PAYLOAD": Send data payload
-    RESPONSE=$(curl -s -X POST \
-      -H 'Content-Type: application/json' \
-      -H "Authorization: Bearer $AUTH_TOKEN" \
-      -d "$JSON_PAYLOAD" \
-      "$API_ENDPOINT")
+        # Use curl to send the request
+        # -s: Silent mode (no progress meter)
+        # -X POST: Specify POST method
+        # -H 'Header: Value': Set custom headers
+        # -d "$JSON_PAYLOAD": Send data payload
+        RESPONSE=$(curl -s -X POST \
+          -H 'Content-Type: application/json' \
+          -H "Authorization: Bearer $AUTH_TOKEN" \
+          -d "$JSON_PAYLOAD" \
+          "$API_ENDPOINT")
 
-    echo "--- Raw Response ---"
-    echo "$RESPONSE"
-    echo "---"
+        # Check curl exit status (though set -e should catch failures)
+        if [ $? -ne 0 ]; then
+          echo "Error: curl command failed." >&2
+          exit 1
+        fi
 
-    # Process response with jq
-    echo "Extracting data from response using jq..."
-    # Example: Extract the 'json' part echoed back by httpbin, then get 'item_name'
-    ITEM_NAME=$(echo "$RESPONSE" | jq -r '.json.item_name')
-    # Example: Extract the first option from the 'options' array
-    FIRST_OPTION=$(echo "$RESPONSE" | jq -r '.json.options[0]')
-    # Example: Check if 'Origin' IP is present in response headers
-    ORIGIN_IP=$(echo "$RESPONSE" | jq -r '.headers."X-Forwarded-For" // .origin') # Use fallback with //
+        echo "--- Raw Response --- "
+        # Check if response seems like valid JSON before proceeding
+        if ! echo "$RESPONSE" | jq empty > /dev/null 2>&1; then
+            echo "Error: Response is not valid JSON." >&2
+            echo "$RESPONSE"
+            exit 1
+        fi
+        echo "$RESPONSE" | jq . # Pretty-print JSON response
+        echo "--- End Raw Response --- "
 
-    echo "Item Name from response: $ITEM_NAME"
-    echo "First Option from response: $FIRST_OPTION"
-    echo "Origin IP from response: $ORIGIN_IP"
-    ```
-* **Explanation:** Uses `jq -n` to safely construct a JSON payload from variables. `curl` sends a POST request with appropriate headers (`-H`) and the JSON data (`-d`). The response (which is often JSON) is captured in a variable and then piped to `jq` for extracting specific fields using path expressions (`.json.item_name`, `.json.options[0]`). `-r` gets raw string output from `jq`. `//` provides a fallback value in `jq` if a key is missing.
-* **Notes:** Building JSON safely using `jq` or dedicated tools is better than manual string concatenation. Remember to handle sensitive data like tokens securely (e.g., using environment variables or secret management tools, not hardcoding).
+        # Process response with jq
+        echo "Extracting data from response using jq..."
+        # Example: Extract the 'json' part echoed back by httpbin, then get 'item_name'
+        # Use || echo "null" to handle cases where the path doesn't exist, preventing jq error
+        ITEM_NAME=$(echo "$RESPONSE" | jq -r '.json.item_name // "Not found"')
+        # Example: Extract the first option from the 'options' array
+        FIRST_OPTION=$(echo "$RESPONSE" | jq -r '.json.options[0] // "Not found"')
+        # Example: Check if 'Origin' IP is present in response headers
+        ORIGIN_IP=$(echo "$RESPONSE" | jq -r '.headers."X-Forwarded-For" // .origin // "Unknown"') # Use fallback with //
+
+        echo "Item Name from response: $ITEM_NAME"
+        echo "First Option from response: $FIRST_OPTION"
+        echo "Origin IP from response: $ORIGIN_IP"
+        ```
 
 ---
 
-**6. Advanced Shell Features**
+**6. Advanced Shell Features (`bash`)**
 
-* **Process Substitution**
-    ```bash
-    #!/bin/bash
-    # Example: Compare the output of two commands using diff, without temporary files
+*   **Process Substitution**
+    *   **What it does:** Allows the output of a command (or multiple commands) to be treated as a file directly on the command line of another command.
+    *   **Why you use it:** Avoids the need for temporary files when comparing the output of commands (`diff <(cmd1) <(cmd2)`) or providing generated configuration to tools that expect a file input (`tool -c <(generate_config)`).
+    *   **Code (`bash`, `zsh`, `ksh`):**
+        ```bash
+        #!/bin/bash
+        # Example: Compare the output of two commands using diff, without temporary files
 
-    echo "Comparing differences between ls output of /etc and /usr/lib..."
+        echo "Comparing differences between ls output of /etc and /usr/lib (if they exist)..."
 
-    # diff requires two file arguments.
-    # <(command) runs 'command' and presents its output as if it were a file.
-    diff <(ls -1 /etc | sort) <(ls -1 /usr/lib | sort)
+        # Check if directories exist before attempting ls
+        ETC_LIST="/dev/null"
+        if [ -d /etc ]; then ETC_LIST=$(ls -1 /etc | sort); fi
 
-    echo "---"
+        USR_LIB_LIST="/dev/null"
+        if [ -d /usr/lib ]; then USR_LIB_LIST=$(ls -1 /usr/lib | sort); fi
 
-    # Example: Passing structured arguments to a command expecting a file
-    # Imagine 'my_tool' reads configuration lines from a file specified by -c
-    echo "Running my_tool with generated config..."
-    # my_tool -c <(
-    #   echo "setting1=value1"
-    #   echo "setting2=value_with_spaces"
-    #   grep '^important' /some/other/config/file # Include important lines from elsewhere
-    # )
-    # # Replace above with an actual command if you have one to test
-    echo "(Skipping actual execution of my_tool in example)"
-    ```
-* **Explanation:** Process substitution `<(command)` runs `command` in the background, connects its standard output to a special file descriptor (like `/dev/fd/63`), and substitutes that file descriptor path onto the command line. This allows commands that expect filenames as arguments to read directly from the output of other commands without explicit temporary files. `>(command)` works similarly for output.
-* **Notes:** This is a powerful feature available in `bash`, `zsh`, and `ksh`, but not standard POSIX `sh`.
+        # diff requires two file arguments.
+        # <(command) runs 'command' and presents its output as if it were a file.
+        # Using process substitution with the command output stored in variables
+        diff <(echo "$ETC_LIST") <(echo "$USR_LIB_LIST")
+        echo "Diff complete."
 
-* **Associative Arrays (`bash` 4.0+)**
-    ```bash
-    #!/bin/bash
-    # Requires bash version 4.0 or later
+        echo "---"
 
-    # Declare an associative array (like a dictionary or hash map)
-    declare -A user_roles
+        # Example: Passing structured arguments to a command expecting a file
+        # Imagine 'my_tool' reads configuration lines from a file specified by -c
+        echo "Running hypothetical my_tool with generated config..."
+        # my_tool -c <(
+        #   echo "setting1=value1"
+        #   echo "setting2=value_with_spaces"
+        #   # Example: include lines from another file if it exists
+        #   if [ -f /some/other/config/file ]; then
+        #       grep '^important' /some/other/config/file
+        #   fi
+        # )
+        # # Replace above with an actual command if you have one to test
+        echo "(Skipping actual execution of my_tool in example)"
+        ```
 
-    # Assign key-value pairs
-    user_roles["alice"]="admin"
-    user_roles["bob"]="developer"
-    user_roles["charlie"]="viewer"
+*   **Associative Arrays (`bash` 4.0+)**
+    *   **What it does:** Provides hash map or dictionary-like data structures within Bash, allowing key-value storage where keys are strings.
+    *   **Why you use it:** Useful for mapping, lookups, and storing structured data within a script without resorting to external tools or complex string parsing. Great for configuration or tracking states.
+    *   **Code (`bash` 4.0+):**
+        ```bash
+        #!/bin/bash
+        # Requires bash version 4.0 or later
 
-    # Access a value by key
-    USER_TO_CHECK="bob"
-    ROLE=${user_roles["$USER_TO_CHECK"]}
-    echo "Role for $USER_TO_CHECK: $ROLE" # Output: developer
+        # Check Bash version (optional but good practice)
+        if (( BASH_VERSINFO[0] < 4 )); then
+            echo "Error: Bash version 4.0 or higher is required for associative arrays." >&2
+            exit 1
+        fi
 
-    # Check if a key exists
-    if [[ -v user_roles["david"] ]]; then
-        echo "David has a role."
-    else
-        echo "David does not have a role assigned."
-    fi
+        # Declare an associative array (like a dictionary or hash map)
+        declare -A user_roles
 
-    # Iterate over keys
-    echo "All users:"
-    for user in "${!user_roles[@]}"; do
-        echo " - $user"
-    done
+        # Assign key-value pairs
+        user_roles["alice"]="admin"
+        user_roles["bob"]="developer"
+        user_roles["charlie"]="viewer"
 
-    # Iterate over values
-    echo "All roles:"
-    for role in "${user_roles[@]}"; do
-        echo " - $role"
-    done
+        # Access a value by key
+        USER_TO_CHECK="bob"
+        # Use quotes around key for safety, although often works without for simple keys
+        ROLE=${user_roles["$USER_TO_CHECK"]}
+        echo "Role for $USER_TO_CHECK: $ROLE" # Output: developer
 
-    # Iterate over key-value pairs
-    echo "User-Role mapping:"
-    for user in "${!user_roles[@]}"; do
-        echo " - User: $user, Role: ${user_roles[$user]}"
-    done
-    ```
-* **Explanation:** Associative arrays allow you to store and retrieve values using string keys, similar to dictionaries in Python. `declare -A` creates one. `${array["key"]}` accesses values. `${!array[@]}` gets all keys. `${array[@]}` gets all values.
-* **Notes:** This is a `bash` 4.0+ specific feature, not available in older `bash` or POSIX `sh`. It's very useful for mapping and lookup tasks within scripts.
+        # Check if a key exists (safer than checking if value is empty)
+        if [[ -v user_roles["david"] ]]; then
+            echo "David has a role: ${user_roles["david"]}"
+        else
+            echo "David does not have a role assigned."
+        fi
 
-These advanced snippets provide more tools for creating sophisticated, robust, and efficient shell scripts for various engineering and data science automation tasks.
+        # Add another user
+        user_roles["david"]="guest"
+
+        # Iterate over keys
+        echo "All users (keys):"
+        # Quote "${!user_roles[@]}" to handle keys with spaces correctly if they existed
+        for user in "${!user_roles[@]}"; do
+            echo " - $user"
+        done
+
+        # Iterate over values
+        echo "All roles (values):"
+        # Quote "${user_roles[@]}" to handle values with spaces correctly
+        for role in "${user_roles[@]}"; do
+            echo " - $role"
+        done
+
+        # Iterate over key-value pairs
+        echo "User-Role mapping:"
+        for user in "${!user_roles[@]}"; do
+            echo " - User: $user, Role: ${user_roles[$user]}"
+        done
+
+        # Remove an element
+        unset user_roles["charlie"]
+        echo "Removed charlie. Remaining users: ${!user_roles[@]}"
+        ```
+
+These advanced snippets provide more tools for creating sophisticated, robust, and efficient shell scripts.

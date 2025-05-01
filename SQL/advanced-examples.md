@@ -1,20 +1,20 @@
+# SQL Code Snippets Library: Advanced Examples
 
-**Crucial Reminder:** Advanced features, especially those dealing with procedural logic, specialized data types (JSON, arrays), or performance tuning, are **highly dialect-specific**. Always consult the documentation for your specific database system (PostgreSQL, SQL Server, MySQL, Oracle, BigQuery, Snowflake, etc.).
-Okay, let's explore some more advanced SQL patterns and techniques. These are often used for complex analysis, data transformation, or handling non-traditional data structures within the database.
+This document explores more advanced SQL patterns and techniques often used for complex analysis, data transformation, or handling non-traditional data structures within the database.
 
-**Heavier Emphasis on Dialect Differences:** For these advanced patterns, syntax variations between database systems (PostgreSQL, MySQL, SQL Server, Oracle, BigQuery, Snowflake, etc.) become even more pronounced. **Always consult your specific database documentation.** The examples provided aim to illustrate the *concept* using common or standard approaches where possible.
+**Crucial Reminder:** Advanced features, especially those dealing with procedural logic, specialized data types (JSON, arrays), or performance tuning, are **highly dialect-specific**. Always consult the documentation for your specific database system (PostgreSQL, SQL Server, MySQL, Oracle, BigQuery, Snowflake, etc.). The examples provided aim to illustrate the *concept* using common or standard approaches where possible.
 
 ---
 
 **1. Recursive Common Table Expressions (CTEs)**
 
-* **Purpose:** To query hierarchical or graph-like data, such as organizational charts, product categories, bill of materials, or network paths.
-* **Concept:** A CTE that references itself. It consists of an "anchor member" (the starting point/base case) combined with a "recursive member" (which joins back to the CTE) using `UNION ALL`.
-* **SQL Pattern (Illustrative - Syntax like `RECURSIVE` may vary):**
+*   **What it does:** Queries hierarchical or graph-like data structures (like organizational charts, category trees, network paths) by defining a CTE that references itself, typically involving an anchor query and a recursive query joined by `UNION ALL`.
+*   **Why you use it:** To traverse and process data with parent-child or node-edge relationships within a single query, avoiding complex loops or multiple queries.
+*   **Note:** The `RECURSIVE` keyword requirement and syntax details may vary between database systems.
     ```sql
     -- Example: Finding all subordinates under a specific manager in an employee hierarchy
     WITH RECURSIVE EmployeeHierarchy AS (
-        -- Anchor Member: Start with the top-level manager(s)
+        -- Anchor Member: Start with the top-level manager(s) or a specific employee
         SELECT
             employee_id,
             employee_name,
@@ -23,7 +23,8 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
         FROM
             your_schema.employees
         WHERE
-            manager_id IS NULL -- Or specify a starting employee_id
+            manager_id IS NULL -- Example: start from the top (no manager)
+            -- OR employee_id = 123 -- Example: start from a specific employee
 
         UNION ALL
 
@@ -51,16 +52,14 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
     ORDER BY
         level, employee_name;
     ```
-* **Explanation:** The `RECURSIVE` keyword (required in PostgreSQL/MySQL, implicit in SQL Server/Oracle when self-referencing) enables the CTE to call itself. The anchor selects the starting rows. The recursive member joins the source table back to the CTE based on the hierarchical relationship (`e.manager_id = eh.employee_id`), incrementing the level until no more rows are found or a limit is reached.
-* **Notes:** Ensure a termination condition (like the `WHERE eh.level < 10` or ensuring the hierarchy is finite) to prevent infinite recursion.
 
 ---
 
 **2. Pivoting Data (Rows to Columns) using Conditional Aggregation**
 
-* **Purpose:** To transform data from a "long" format (multiple rows per subject) to a "wide" format (one row per subject with different attributes in columns). Useful for reporting and cross-tabulation.
-* **Concept:** Use aggregate functions (`SUM`, `MAX`, `MIN`, `AVG`, `COUNT`) combined with `CASE WHEN` statements to pick out specific values for the new columns, grouped by the identifying columns. This method is generally more portable than native `PIVOT` operators.
-* **SQL Pattern:**
+*   **What it does:** Transforms data from a "long" format (multiple rows per subject, one attribute per row) to a "wide" format (one row per subject, multiple attributes as columns).
+*   **Why you use it:** To create summary reports, cross-tabulations, or prepare data for tools that expect a wide format. Conditional aggregation (`AGG(CASE WHEN...)`) is a portable method for pivoting.
+*   **Note:** This method requires knowing the pivot column values beforehand. For dynamic pivot columns, dynamic SQL is often needed.
     ```sql
     -- Example: Pivoting monthly sales into columns for each product
     SELECT
@@ -75,7 +74,12 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
         SELECT
             product_id,
             -- Format the date to month level (syntax varies: TO_CHAR, DATE_FORMAT, FORMAT)
-            FORMAT(sales_date, 'yyyy-MM') AS sales_month,
+            -- Example for PostgreSQL/BigQuery:
+            TO_CHAR(sales_date, 'YYYY-MM') AS sales_month,
+            -- Example for MySQL:
+            -- DATE_FORMAT(sales_date, '%Y-%m') AS sales_month,
+            -- Example for SQL Server:
+            -- FORMAT(sales_date, 'yyyy-MM') AS sales_month,
             sales_amount
         FROM
             your_schema.sales_data
@@ -85,16 +89,14 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
     ORDER BY
         product_id;
     ```
-* **Explanation:** The inner query prepares the data, identifying the pivoting column (`sales_month`) and the value column (`sales_amount`). The outer query groups by the subject (`product_id`). For each product, the `CASE WHEN` statements inside the aggregate functions select the `sales_amount` *only* if it corresponds to the target column's month. `MAX` (or `SUM`/`AVG`) aggregates these values (often operating on just one non-NULL value per group per case).
-* **Notes:** If the pivoted column names are dynamic (not known beforehand), you typically need dynamic SQL (building the query string programmatically), which is much more complex and database-specific. Some databases (SQL Server, Oracle, Snowflake) have native `PIVOT` syntax which can be more concise but less portable.
 
 ---
 
 **3. Unpivoting Data (Columns to Rows) using UNION ALL**
 
-* **Purpose:** To transform data from a "wide" format (multiple related columns) to a "long" format (attribute-value pairs). Useful for normalizing data or preparing it for tools that expect long formats.
-* **Concept:** Select the identifying columns along with *one* of the columns-to-be-unpivoted, adding a literal value to indicate the source column's name. Repeat this for each column you want to unpivot, combining the results with `UNION ALL`.
-* **SQL Pattern:**
+*   **What it does:** Transforms data from a "wide" format (multiple related columns representing attributes) to a "long" format (attribute-value pairs across multiple rows).
+*   **Why you use it:** To normalize data structures, simplify certain types of aggregation or filtering, or prepare data for systems that expect an entity-attribute-value (EAV) model.
+*   **Note:** The `UNION ALL` method is highly portable. Some databases offer native `UNPIVOT` or `CROSS JOIN LATERAL`/`APPLY` methods which might be more concise but less portable.
     ```sql
     -- Example: Unpivoting quarterly sales columns into rows
     SELECT
@@ -137,16 +139,14 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
     ORDER BY
         product_id, sales_quarter;
     ```
-* **Explanation:** Each `SELECT` statement extracts the primary identifier (`product_id`), adds a hardcoded label for the quarter (`'Q1'`, `'Q2'`, etc.), and selects the corresponding sales value (`q1_sales`, `q2_sales`, etc.). `UNION ALL` stacks these results vertically. `WHERE ... IS NOT NULL` is often used to avoid creating rows for empty original columns.
-* **Notes:** This method is highly portable. Some databases offer native `UNPIVOT` operators (SQL Server, Oracle, Snowflake) or more advanced lateral joins (`CROSS JOIN LATERAL` in PostgreSQL, `CROSS APPLY` in SQL Server/Oracle) combined with `VALUES` constructors, which can be more efficient or concise but less portable.
 
 ---
 
 **4. Sessionization**
 
-* **Purpose:** To group sequences of user events (e.g., page views, clicks) into distinct "sessions" based on user ID and time gaps (e.g., > 30 minutes of inactivity starts a new session).
-* **Concept:** Use the `LAG` window function to find the timestamp of the previous event for each user. Calculate the time difference. Identify rows where the difference exceeds the timeout threshold (or where it's the user's first event) – these mark the start of a new session. Assign a unique session ID, often by doing a cumulative count of these start-of-session flags.
-* **SQL Pattern (Illustrative - Date functions vary):**
+*   **What it does:** Groups sequences of user events (e.g., page views, clicks) into distinct sessions based on user activity and time gaps between events (e.g., > 30 minutes of inactivity starts a new session).
+*   **Why you use it:** To analyze user behavior within discrete periods of activity, understand user engagement patterns, and calculate session-based metrics.
+*   **Note:** Date/time difference calculation syntax is highly database-specific. Performance requires good indexing on user ID and timestamp columns.
     ```sql
     WITH EventTiming AS (
         -- Calculate time difference from previous event for each user
@@ -165,14 +165,17 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
             user_id,
             event_timestamp,
             prev_event_timestamp,
-            -- Calculate difference (syntax varies: DATEDIFF, timestamp subtraction)
-            -- Assuming timestamp subtraction yields an interval or numeric value in minutes
-            EXTRACT(EPOCH FROM (event_timestamp - prev_event_timestamp))/60 AS minutes_since_last_event, -- PostgreSQL example
-            -- DATEDIFF(minute, prev_event_timestamp, event_timestamp) AS minutes_since_last_event, -- SQL Server example
+            -- Calculate difference (syntax varies: DATEDIFF, timestamp subtraction, EXTRACT EPOCH)
+            -- PostgreSQL example (difference in minutes):
+            EXTRACT(EPOCH FROM (event_timestamp - prev_event_timestamp))/60 AS minutes_since_last_event,
+            -- SQL Server example (difference in minutes):
+            -- DATEDIFF(minute, prev_event_timestamp, event_timestamp) AS minutes_since_last_event,
             CASE
                 WHEN prev_event_timestamp IS NULL -- First event for user
-                     OR (EXTRACT(EPOCH FROM (event_timestamp - prev_event_timestamp))/60) > 30 -- Exceeds 30 min timeout (PostgreSQL example)
-                     -- OR DATEDIFF(minute, prev_event_timestamp, event_timestamp) > 30 -- (SQL Server example)
+                     -- PostgreSQL example condition:
+                     OR (EXTRACT(EPOCH FROM (event_timestamp - prev_event_timestamp))/60) > 30 -- Exceeds 30 min timeout
+                     -- SQL Server example condition:
+                     -- OR DATEDIFF(minute, prev_event_timestamp, event_timestamp) > 30
                     THEN 1
                 ELSE 0
             END AS is_new_session_start
@@ -206,29 +209,25 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
     ORDER BY
         user_id, event_timestamp;
     ```
-* **Explanation:** Uses CTEs to break down the logic. `EventTiming` gets the previous event time using `LAG`. `SessionStartFlag` calculates the time difference (syntax varies!) and flags session starts. `SessionAssignment` calculates a running count (`SUM() OVER(...)`) of the `is_new_session_start` flag for each user, effectively assigning a sequence number to each session for that user.
-* **Notes:** The exact syntax for calculating time differences is highly database-dependent. Ensure consistent time zones. Performance can be challenging on very large event tables; partitioning and indexing `user_id` and `event_timestamp` are crucial.
 
 ---
 
 **5. Cohort Analysis (Retention)**
 
-* **Purpose:** To track the behavior (e.g., retention, repeat purchases) of groups (cohorts) of users who share a common characteristic, typically their acquisition date or first action date.
-* **Concept:**
-    1.  Determine the cohort for each user (e.g., the month/week of their first activity/signup).
-    2.  Track user activity over subsequent periods (days, weeks, months after cohort assignment).
-    3.  Calculate the difference between the activity date and the cohort date to get the "period number" (e.g., Month 0, Month 1, Month 2).
-    4.  Aggregate to find how many users from each cohort were active in each subsequent period.
-    5.  Often presented as a percentage of the initial cohort size.
-* **SQL Pattern (Illustrative - Date functions vary):**
+*   **What it does:** Tracks the behavior (e.g., retention, repeat purchases) of groups (cohorts) of users who share a common characteristic, typically their acquisition date or first action date, over subsequent time periods.
+*   **Why you use it:** To understand how user engagement changes over time based on when they were acquired, compare the long-term value of different cohorts, and assess the impact of product changes or marketing campaigns.
+*   **Note:** Date truncation and difference calculations are major points of dialect variation.
     ```sql
     WITH UserCohorts AS (
         -- Determine the cohort (e.g., first activity month) for each user
         SELECT
             user_id,
-            MIN(DATE_TRUNC('month', activity_date)) AS cohort_month -- PostgreSQL/BigQuery syntax for first day of month
-            -- DATE_FORMAT(MIN(activity_date), '%Y-%m-01') AS cohort_month -- MySQL syntax
-            -- DATEFROMPARTS(YEAR(MIN(activity_date)), MONTH(MIN(activity_date)), 1) AS cohort_month -- SQL Server syntax
+            -- PostgreSQL/BigQuery syntax for first day of month:
+            DATE_TRUNC('month', MIN(activity_date)) AS cohort_month
+            -- MySQL syntax:
+            -- DATE_FORMAT(MIN(activity_date), '%Y-%m-01') AS cohort_month
+            -- SQL Server syntax:
+            -- DATEFROMPARTS(YEAR(MIN(activity_date)), MONTH(MIN(activity_date)), 1) AS cohort_month
         FROM
             your_schema.user_activity
         GROUP BY
@@ -242,10 +241,13 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
             cohort.cohort_month,
             -- Calculate period difference (e.g., number of months since cohort start)
             -- This logic varies significantly based on DB date functions!
+            -- PostgreSQL example (integer number of months):
             (EXTRACT(YEAR FROM act.activity_date) - EXTRACT(YEAR FROM cohort.cohort_month)) * 12 +
-            (EXTRACT(MONTH FROM act.activity_date) - EXTRACT(MONTH FROM cohort.cohort_month)) AS month_number -- PostgreSQL example
-            -- TIMESTAMPDIFF(MONTH, cohort.cohort_month, act.activity_date) AS month_number -- MySQL example
-            -- DATEDIFF(MONTH, cohort.cohort_month, act.activity_date) AS month_number -- SQL Server example
+            (EXTRACT(MONTH FROM act.activity_date) - EXTRACT(MONTH FROM cohort.cohort_month)) AS month_number
+            -- MySQL example:
+            -- TIMESTAMPDIFF(MONTH, cohort.cohort_month, act.activity_date) AS month_number
+            -- SQL Server example:
+            -- DATEDIFF(MONTH, cohort.cohort_month, act.activity_date) AS month_number
         FROM
             your_schema.user_activity AS act
         JOIN
@@ -279,9 +281,13 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
         sizes.cohort_size,
         counts.month_number,
         counts.active_users,
-        -- Calculate retention rate
-        (counts.active_users::FLOAT / sizes.cohort_size) * 100.0 AS retention_percentage -- PostgreSQL casting
-        -- (CAST(counts.active_users AS DECIMAL(10,2)) / sizes.cohort_size) * 100.0 AS retention_percentage -- SQL Server casting
+        -- Calculate retention rate (ensure floating point division)
+        -- PostgreSQL casting:
+        (counts.active_users::FLOAT / sizes.cohort_size) * 100.0 AS retention_percentage
+        -- SQL Server casting:
+        -- (CAST(counts.active_users AS DECIMAL(10,2)) / sizes.cohort_size) * 100.0 AS retention_percentage
+        -- Standard SQL casting:
+        -- (CAST(counts.active_users AS REAL) / sizes.cohort_size) * 100.0 AS retention_percentage
     FROM
         CohortActivityCounts AS counts
     JOIN
@@ -291,17 +297,16 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
         counts.month_number;
 
     ```
-* **Explanation:** Uses CTEs to define user cohorts, join activity back, calculate the time difference (month number), count active users per cohort/month, find the initial cohort size, and finally calculate the retention percentage.
-* **Notes:** Date truncation and difference calculation functions are major points of dialect variation. This calculates monthly retention; adapt the date logic for daily or weekly cohorts.
 
 ---
 
-**6. Querying JSON Data (Conceptual - Syntax Varies Greatly!)**
+**6. Querying JSON Data**
 
-* **Purpose:** To extract data from columns stored in JSON format.
-* **Concept:** Databases supporting JSON offer operators or functions to navigate the JSON structure (using paths) and extract values.
-* **SQL Pattern (PostgreSQL `jsonb` Example):**
+*   **What it does:** Extracts values, objects, or array elements from data stored within JSON-formatted columns.
+*   **Why you use it:** To work with semi-structured data stored in databases, allowing filtering, aggregation, and reporting based on attributes within the JSON payload without needing to parse it externally.
+*   **Note:** Syntax is **extremely** database-specific (`->`, `->>`, `JSON_VALUE`, `JSON_QUERY`, `OPENJSON`, `JSON_EXTRACT`, dot notation). Consult your database documentation.
     ```sql
+    -- PostgreSQL jsonb Example:
     SELECT
         id,
         json_data_column ->> 'name' AS user_name, -- ->> extracts as TEXT
@@ -317,30 +322,32 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
         -- AND json_data_column ? 'optional_key';
         -- Check if JSON array contains a value
         -- AND json_data_column -> 'tags' @> '["important"]'::jsonb;
+
+    -- --- Other Database Examples (Conceptual) ---
+    -- SQL Server Example:
+    -- SELECT id, JSON_VALUE(json_data_column, '$.name') AS user_name FROM your_table;
+    -- MySQL Example:
+    -- SELECT id, JSON_UNQUOTE(JSON_EXTRACT(json_data_column, '$.name')) AS user_name FROM your_table;
+    -- Or: SELECT id, json_data_column->>'$.name' AS user_name FROM your_table;
     ```
-* **Explanation (PostgreSQL):** `->` extracts a JSON object/array, `->>` extracts the value as `TEXT`. Paths use keys for objects and numerical indices (0-based) for arrays. Filtering often requires casting the extracted text value to the appropriate SQL type.
-* **Notes:** **Syntax is extremely different** in other databases:
-    * **SQL Server:** Uses `JSON_VALUE` (for scalar values), `JSON_QUERY` (for objects/arrays), `OPENJSON`.
-    * **MySQL:** Uses `->` (similar to `->` in PG but returns JSON), `->>` (similar to `->>` in PG), `JSON_EXTRACT`, `JSON_TABLE`.
-    * **Oracle:** Uses dot notation with `JSON_VALUE`, `JSON_QUERY`, `JSON_TABLE`.
-    * Always check your DB's specific JSON functions. `jsonb` in PostgreSQL is generally preferred over `json` for performance due to its binary storage format.
 
 ---
 
-**7. Querying Array Data (Conceptual - Syntax Varies)**
+**7. Querying Array Data**
 
-* **Purpose:** To work with columns storing arrays/lists of values.
-* **Concept:** Functions/operators exist to expand array elements into rows (`UNNEST`) or check for element existence.
-* **SQL Pattern (PostgreSQL/BigQuery Example):**
+*   **What it does:** Interacts with data stored as arrays or lists within a single database column, allowing expansion of array elements into rows or filtering based on array contents.
+*   **Why you use it:** To handle multi-valued attributes stored efficiently in an array structure, enabling joins or filtering based on individual array elements.
+*   **Note:** Native array support and syntax vary significantly. Some databases rely on JSON arrays. `UNNEST` is common in PostgreSQL/BigQuery.
     ```sql
-    -- Example: Expand array elements into separate rows
+    -- PostgreSQL/BigQuery Example: Expand array elements into separate rows
     SELECT
-        id,
+        t.id,
         tag -- Each tag gets its own row
     FROM
-        your_schema.table_with_array
-    CROSS JOIN -- Often used with UNNEST
-        UNNEST(tags_array_column) AS tag; -- tags_array_column is like ['sql', 'python', 'data']
+        your_schema.table_with_array AS t,
+        UNNEST(t.tags_array_column) AS tag; -- tags_array_column is like ['sql', 'python', 'data']
+    -- Or using CROSS JOIN LATERAL (PostgreSQL) / CROSS JOIN (BigQuery)
+    -- SELECT t.id, tag FROM your_schema.table_with_array t CROSS JOIN UNNEST(t.tags_array_column) AS tag;
 
     -- Example: Find rows where an array contains a specific element
     SELECT
@@ -349,34 +356,31 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
     FROM
         your_schema.table_with_array
     WHERE
-        -- PostgreSQL array contains operator
+        -- PostgreSQL array contains operator:
         tags_array_column @> ARRAY['python']
-        -- BigQuery standard SQL (uses UNNEST in a subquery or specific functions)
+        -- BigQuery standard SQL (uses UNNEST in a subquery or specific functions):
         -- EXISTS (SELECT 1 FROM UNNEST(tags_array_column) AS t WHERE t = 'python')
-        -- Another BigQuery approach
+        -- Another BigQuery approach:
         -- 'python' IN UNNEST(tags_array_column)
+        ;
     ```
-* **Explanation:** `UNNEST` (common in PostgreSQL, BigQuery) transforms each element of an array into its own row, often used with a `CROSS JOIN` or `LEFT JOIN` to link back to the original row's other columns. Filtering involves specific array operators (like PostgreSQL's `@>`) or using `UNNEST` within subqueries/conditions (like BigQuery).
-* **Notes:** Array support and syntax vary hugely. MySQL has limited native array types (often JSON arrays are used). SQL Server uses JSON arrays or custom table types.
 
 ---
 
-**8. Built-in Statistical Functions (Syntax/Availability Varies)**
+**8. Built-in Statistical Functions**
 
-* **Purpose:** Perform common statistical calculations directly in SQL.
-* **Concept:** Aggregate functions for measures like standard deviation, variance, correlation, percentiles.
-* **SQL Pattern (Illustrative names):**
+*   **What it does:** Calculates common statistical measures like standard deviation, variance, correlation, or percentiles directly within the SQL query.
+*   **Why you use it:** To perform basic statistical analysis on data without exporting it to external tools, useful for summarizing data distributions or relationships.
+*   **Note:** Function names (`STDDEV`/`STDEV`, `VARIANCE`/`VAR`), availability, sample vs. population calculations, and percentile syntax (`PERCENTILE_CONT`/`DISC`, `APPROX_QUANTILES`) vary significantly.
     ```sql
     SELECT
         category,
         AVG(value) AS average_value,
-        STDDEV_SAMP(value) AS sample_std_dev, -- Sample Standard Deviation (STDDEV, STDEV often aliases)
-        STDDEV_POP(value) AS population_std_dev, -- Population Standard Deviation
-        VAR_SAMP(value) AS sample_variance, -- Sample Variance (VARIANCE often an alias)
-        VAR_POP(value) AS population_variance, -- Population Variance
+        STDDEV_SAMP(value) AS sample_std_dev, -- Sample Standard Deviation (or STDDEV, STDEV)
+        VAR_SAMP(value) AS sample_variance, -- Sample Variance (or VARIANCE)
         -- Median using percentile (syntax varies widely)
-        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY value ASC) AS median_continuous, -- Interpolated median (PostgreSQL, SQL Server, Oracle)
-        PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY value ASC) AS median_discrete -- Closest value median
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY value ASC) AS median_continuous -- Interpolated median (PostgreSQL, SQL Server, Oracle)
+        -- PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY value ASC) AS median_discrete -- Closest value median
         -- APPROX_QUANTILES(value, 100)[OFFSET(50)] AS approx_median -- BigQuery approximate percentile
     FROM
         your_schema.your_data
@@ -389,16 +393,11 @@ Okay, let's explore some more advanced SQL patterns and techniques. These are of
     FROM
         your_schema.paired_data;
     ```
-* **Explanation:** These functions calculate statistical properties over groups or entire columns. Pay close attention to sample (`_SAMP`) vs. population (`_POP`) versions. Percentile functions (`PERCENTILE_CONT`, `PERCENTILE_DISC`) often require a specific `WITHIN GROUP (ORDER BY ...)` clause.
-* **Notes:** Function names (`STDDEV`/`STDEV`, `VARIANCE`/`VAR`), availability, and percentile syntax are common points of variation. Approximate percentile functions exist in some databases (like BigQuery) for better performance on huge datasets.
 
 ---
 
 **Conceptual Mentions (No Snippets - Highly DB Specific):**
 
-* **Advanced Indexing:** Beyond single-column indexes, consider:
-    * **Multi-Column Indexes:** For queries filtering/joining on multiple columns. Order matters.
-    * **Covering Indexes:** Include all columns needed by a query directly in the index to avoid table lookups.
-    * **Specialized Indexes:** Hash (for equality checks), GiST/GIN (PostgreSQL for geometric, text, JSON, array data), Full-Text Indexes.
-* **Materialized Views:** Pre-computed result sets of complex queries stored like tables. They speed up frequent reads of complex aggregations or joins but need to be refreshed. Syntax and refresh mechanisms vary greatly.
-* **Stored Procedures/Functions:** Encapsulating reusable SQL logic within the database. Allows for procedural code (loops, variables, conditionals). Syntax is entirely database-specific (PL/pgSQL, T-SQL, PL/SQL, etc.).
+*   **Advanced Indexing:** Beyond single-column indexes, consider Multi-Column Indexes, Covering Indexes, and specialized types like Hash, GiST/GIN (PostgreSQL), or Full-Text indexes based on query patterns.
+*   **Materialized Views:** Pre-computed, stored query results that speed up access to complex aggregations or joins but require a refresh strategy. Syntax and capabilities vary widely.
+*   **Stored Procedures/Functions:** Encapsulating reusable SQL and procedural logic (loops, variables, conditionals) within the database. Syntax is entirely database-specific (PL/pgSQL, T-SQL, PL/SQL, etc.).
